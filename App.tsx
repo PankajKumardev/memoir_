@@ -12,7 +12,6 @@ import {
 } from './types';
 import { ArrowDownToLine, Loader2 } from 'lucide-react';
 
-
 const INITIAL_IMAGE = 'https://picsum.photos/seed/memoir/800/1000';
 
 const App: React.FC = () => {
