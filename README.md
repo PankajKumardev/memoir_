@@ -2,7 +2,19 @@
   <h1>Memoir.</h1>
   <p><em>Analog Lab & Archive</em></p>
   <p>Transform your photos into beautiful analog film-style prints with customizable film stocks, paper types, and typography.</p>
+  
+  <p>
+    <a href="https://github.com/PankajKumardev/memoir_">
+      <img src="https://img.shields.io/badge/GitHub-Repository-181717?style=for-the-badge&logo=github" alt="GitHub Repository" />
+    </a>
+  </p>
 </div>
+
+---
+
+## 📍 Repository
+
+**GitHub**: [https://github.com/PankajKumardev/memoir\_](https://github.com/PankajKumardev/memoir_)
 
 ---
 
@@ -32,7 +44,7 @@
 1. **Clone the repository**
 
    ```bash
-   git clone <repository-url>
+   git clone https://github.com/PankajKumardev/memoir_.git
    cd memoir_
    ```
 
@@ -161,9 +173,17 @@ export const PAPERS: PaperType[] = [
 
 - Export functionality may not work with external images due to CORS restrictions. The app automatically converts external images to base64 to mitigate this.
 
+## 🤝 Contributing
+
+Contributions, issues, and feature requests are welcome! Feel free to check the [issues page](https://github.com/PankajKumardev/memoir_/issues).
+
 ## 📄 License
 
 This project is private and proprietary.
+
+## 🔗 Links
+
+- **Repository**: [https://github.com/PankajKumardev/memoir\_](https://github.com/PankajKumardev/memoir_)
 
 ## 👨‍💻 Development
 
