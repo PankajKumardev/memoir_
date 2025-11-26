@@ -1,5 +1,8 @@
-@import 'tailwindcss';
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
+/* Custom scrollbar styling - requires CSS as Tailwind doesn't support pseudo-elements for scrollbars */
 ::-webkit-scrollbar {
   width: 6px;
 }
