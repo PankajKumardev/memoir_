@@ -1,0 +1,23 @@
+/* Custom scrollbar styling - requires CSS as Tailwind doesn't support pseudo-elements for scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #e5e5e5;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #c75d46;
+}
+
+/* Prevent text size adjustment on iOS - requires CSS */
+* {
+  -webkit-text-size-adjust: 100%;
+}
+
