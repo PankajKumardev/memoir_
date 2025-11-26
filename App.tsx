@@ -12,7 +12,10 @@ import {
 } from './types';
 import { ArrowDownToLine, Loader2 } from 'lucide-react';
 
-const INITIAL_IMAGE = 'https://picsum.photos/seed/memoir/800/1000';
+const getRandomImageUrl = () => {
+  const randomId = Math.floor(Math.random() * 1000);
+  return `https://picsum.photos/800/1000?random=${randomId}`;
+};
 
 const App: React.FC = () => {
   const [image, setImage] = useState<string>('');
@@ -21,6 +24,8 @@ const App: React.FC = () => {
   const [aspectRatio, setAspectRatio] = useState<AspectRatio>(ASPECT_RATIOS[1]); // Default 4:5
   const [caption, setCaption] = useState<string>('Memoir. No. 001');
   const [fontFamily, setFontFamily] = useState<FontFamily>('serif');
+  const [imagePosition, setImagePosition] = useState<number>(50); // 0-100, default 50 (center) - vertical
+  const [imagePositionX, setImagePositionX] = useState<number>(50); // 0-100, default 50 (center) - horizontal
   const [metadata, setMetadata] = useState<PhotoMetadata>({
     iso: 'ISO 400',
     aperture: 'ƒ/2.8',
@@ -57,12 +62,12 @@ const App: React.FC = () => {
         });
       } catch (error) {
         console.error('Failed to load image as base64:', error);
-        // If CORS fails, return the URL as fallback
         return url;
       }
     };
 
-    loadImageAsDataUrl(INITIAL_IMAGE).then((dataUrl) => {
+    const randomImageUrl = getRandomImageUrl();
+    loadImageAsDataUrl(randomImageUrl).then((dataUrl) => {
       setImage(dataUrl);
     });
   }, []);
@@ -202,6 +207,8 @@ const App: React.FC = () => {
             metadata={metadata}
             caption={caption}
             fontFamily={fontFamily}
+            imagePosition={imagePosition}
+            imagePositionX={imagePositionX}
           />
         </div>
       </main>
@@ -218,6 +225,10 @@ const App: React.FC = () => {
         setCaption={setCaption}
         currentFont={fontFamily}
         setFont={setFontFamily}
+        imagePosition={imagePosition}
+        setImagePosition={setImagePosition}
+        imagePositionX={imagePositionX}
+        setImagePositionX={setImagePositionX}
         onUpload={handleImageUpload}
       />
     </div>

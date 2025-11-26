@@ -1,7 +1,14 @@
 import React from 'react';
 import { FilmStock, PaperType, AspectRatio, FontFamily } from '../types';
 import { FILM_STOCKS, PAPERS, ASPECT_RATIOS } from '../constants';
-import { Upload, Type, Aperture, Layout, Palette } from 'lucide-react';
+import {
+  Upload,
+  Type,
+  Aperture,
+  Layout,
+  Palette,
+  ArrowUpDown,
+} from 'lucide-react';
 
 interface SidebarProps {
   currentFilter: FilmStock;
@@ -14,6 +21,10 @@ interface SidebarProps {
   setCaption: (s: string) => void;
   currentFont: FontFamily;
   setFont: (f: FontFamily) => void;
+  imagePosition: number;
+  setImagePosition: (p: number) => void;
+  imagePositionX: number;
+  setImagePositionX: (p: number) => void;
   onUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
@@ -44,6 +55,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
   setCaption,
   currentFont,
   setFont,
+  imagePosition,
+  setImagePosition,
+  imagePositionX,
+  setImagePositionX,
   onUpload,
 }) => {
   return (
@@ -127,6 +142,103 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 {ratio.label}
               </button>
             ))}
+          </div>
+        </SidebarSection>
+
+        {/* Image Position */}
+        <SidebarSection title="Image Position" icon={<ArrowUpDown size={14} />}>
+          <div className="space-y-4">
+            {/* Vertical Position (Up/Down) */}
+            <div>
+              <div className="flex items-center gap-3 mb-2">
+                <button
+                  onClick={() =>
+                    setImagePosition(Math.max(0, imagePosition - 10))
+                  }
+                  className="px-3 py-2 border border-[#E5E5E5] hover:border-gray-400 transition-colors active:scale-95"
+                  aria-label="Move image up"
+                >
+                  <span className="font-mono text-[10px] sm:text-xs">↑</span>
+                </button>
+                <div className="flex-1">
+                  <input
+                    type="range"
+                    min="0"
+                    max="100"
+                    value={imagePosition}
+                    onChange={(e) => setImagePosition(Number(e.target.value))}
+                    className="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-[#1C1C1C]"
+                    style={{
+                      background: `linear-gradient(to right, #1C1C1C 0%, #1C1C1C ${imagePosition}%, #E5E5E5 ${imagePosition}%, #E5E5E5 100%)`,
+                    }}
+                  />
+                </div>
+                <button
+                  onClick={() =>
+                    setImagePosition(Math.min(100, imagePosition + 10))
+                  }
+                  className="px-3 py-2 border border-[#E5E5E5] hover:border-gray-400 transition-colors active:scale-95"
+                  aria-label="Move image down"
+                >
+                  <span className="font-mono text-[10px] sm:text-xs">↓</span>
+                </button>
+              </div>
+              <div className="text-center">
+                <span className="font-mono text-[9px] sm:text-[10px] text-gray-400 uppercase">
+                  {imagePosition === 50
+                    ? 'Vertical: Center'
+                    : imagePosition < 50
+                    ? `Vertical: Top (${imagePosition}%)`
+                    : `Vertical: Bottom (${imagePosition}%)`}
+                </span>
+              </div>
+            </div>
+
+            {/* Horizontal Position (Left/Right) */}
+            <div>
+              <div className="flex items-center gap-3 mb-2">
+                <button
+                  onClick={() =>
+                    setImagePositionX(Math.max(0, imagePositionX - 10))
+                  }
+                  className="px-3 py-2 border border-[#E5E5E5] hover:border-gray-400 transition-colors active:scale-95"
+                  aria-label="Move image left"
+                >
+                  <span className="font-mono text-[10px] sm:text-xs">←</span>
+                </button>
+                <div className="flex-1">
+                  <input
+                    type="range"
+                    min="0"
+                    max="100"
+                    value={imagePositionX}
+                    onChange={(e) => setImagePositionX(Number(e.target.value))}
+                    className="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-[#1C1C1C]"
+                    style={{
+                      background: `linear-gradient(to right, #1C1C1C 0%, #1C1C1C ${imagePositionX}%, #E5E5E5 ${imagePositionX}%, #E5E5E5 100%)`,
+                    }}
+                  />
+                </div>
+                <button
+                  onClick={() =>
+                    setImagePositionX(Math.min(100, imagePositionX + 10))
+                  }
+                  className="px-3 py-2 border border-[#E5E5E5] hover:border-gray-400 transition-colors active:scale-95"
+                  aria-label="Move image right"
+                >
+                  <span className="font-mono text-[10px] sm:text-xs">→</span>
+                </button>
+              </div>
+              <div className="text-center">
+                <span className="font-mono text-[9px] sm:text-[10px] text-gray-400 uppercase">
+                  {imagePositionX === 50
+                    ? 'Horizontal: Center'
+                    : imagePositionX < 50
+                    ? `Horizontal: Left (${imagePositionX}%)`
+                    : `Horizontal: Right (${imagePositionX}%)`}
+                </span>
+              </div>
+            </div>
           </div>
         </SidebarSection>
 

@@ -16,6 +16,8 @@ interface PhotoCardProps {
   metadata: PhotoMetadata;
   caption: string;
   fontFamily: FontFamily;
+  imagePosition: number; // 0-100 for vertical position
+  imagePositionX: number; // 0-100 for horizontal position
   innerRef: React.RefObject<HTMLDivElement>;
 }
 
@@ -27,6 +29,8 @@ const PhotoCard: React.FC<PhotoCardProps> = ({
   metadata,
   caption,
   fontFamily,
+  imagePosition,
+  imagePositionX,
   innerRef,
 }) => {
   // Determine text color based on paper brightness (simple heuristic)
@@ -73,7 +77,10 @@ const PhotoCard: React.FC<PhotoCardProps> = ({
               src={image}
               alt="Art Print"
               className="w-full h-full object-cover transition-all duration-500"
-              style={{ filter: filmStock.cssFilter }} // Dynamic CSS filter - must use inline style
+              style={{
+                filter: filmStock.cssFilter, // Dynamic CSS filter - must use inline style
+                objectPosition: `${imagePositionX}% ${imagePosition}%`, // Dynamic horizontal and vertical position
+              }}
               crossOrigin={image.startsWith('data:') ? undefined : 'anonymous'}
             />
           )}
