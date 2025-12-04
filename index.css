@@ -40,3 +40,77 @@
 * {
   -webkit-text-size-adjust: 100%;
 }
+
+/* Film Strip Border Effect */
+.film-strip-border {
+  --hole-color: rgba(0,0,0,0.2);
+  --border-color: rgba(0,0,0,0.1);
+  padding-left: 36px !important;
+  padding-right: 36px !important;
+  position: relative;
+}
+
+/* Film edge strips with holes */
+.film-strip-border::before,
+.film-strip-border::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 36px;
+  background-image: radial-gradient(circle at center, var(--hole-color) 4px, transparent 4px);
+  background-size: 36px 24px;
+  background-position: center 6px;
+  background-repeat: repeat-y;
+  z-index: 10;
+}
+
+.film-strip-border::before {
+  left: 0;
+  border-right: 1px solid var(--border-color);
+}
+
+.film-strip-border::after {
+  right: 0;
+  border-left: 1px solid var(--border-color);
+}
+
+.film-strip-border-horizontal {
+  --hole-color: rgba(0,0,0,0.2);
+  --border-color: rgba(0,0,0,0.1);
+  padding-top: 36px !important;
+  padding-bottom: 36px !important;
+  position: relative;
+}
+
+/* Film edge strips - horizontal with holes */
+.film-strip-border-horizontal::before,
+.film-strip-border-horizontal::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 36px;
+  background-image: radial-gradient(circle at center, var(--hole-color) 4px, transparent 4px);
+  background-size: 24px 36px;
+  background-position: 6px center;
+  background-repeat: repeat-x;
+  z-index: 10;
+}
+
+.film-strip-border-horizontal::before {
+  top: 0;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.film-strip-border-horizontal::after {
+  bottom: 0;
+  border-top: 1px solid var(--border-color);
+}
+
+/* Polaroid Border Effect */
+.polaroid-border {
+  padding: 12px 12px 56px 12px !important;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.12), 0 1px 3px rgba(0,0,0,0.08);
+  border-radius: 2px !important;
+}

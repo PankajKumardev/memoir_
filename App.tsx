@@ -4,13 +4,14 @@ import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { toBlob } from 'html-to-image';
 import { Sidebar } from './components/Sidebar';
 import PhotoCard from './components/PhotoCard';
-import { FILM_STOCKS, PAPERS, ASPECT_RATIOS } from './constants';
+import { FILM_STOCKS, PAPERS, ASPECT_RATIOS, FRAMES } from './constants';
 import {
   FilmStock,
   PaperType,
   AspectRatio,
   PhotoMetadata,
   FontFamily,
+  FrameType,
 } from './types';
 import { ArrowDownToLine, Loader2 } from 'lucide-react';
 
@@ -33,6 +34,9 @@ const App: React.FC = () => {
   const [grain, setGrain] = useState<number>(50); // 0-100
   const [vignette, setVignette] = useState<number>(20); // 0-100
   const [warmth, setWarmth] = useState<number>(0); // 0-100
+  
+  // Frame Style
+  const [frame, setFrame] = useState<FrameType>(FRAMES[0]);
 
   const [metadata, setMetadata] = useState<PhotoMetadata>({
     iso: 'ISO 400',
@@ -79,7 +83,6 @@ const App: React.FC = () => {
     });
   }, []);
 
-  // Handlers
   // Handlers
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -270,6 +273,7 @@ const App: React.FC = () => {
             grain={grain}
             vignette={vignette}
             warmth={warmth}
+            frame={frame}
           />
         </div>
       </main>
@@ -297,6 +301,8 @@ const App: React.FC = () => {
         setVignette={setVignette}
         warmth={warmth}
         setWarmth={setWarmth}
+        currentFrame={frame}
+        setFrame={setFrame}
       />
     </div>
   );

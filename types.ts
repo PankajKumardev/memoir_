@@ -27,3 +27,10 @@ export interface PhotoMetadata {
 }
 
 export type FontFamily = 'mono' | 'serif' | 'script';
+
+export interface FrameType {
+  id: string;
+  name: string;
+  cssClass: string;
+  type: 'paper' | 'film' | 'polaroid';
+}

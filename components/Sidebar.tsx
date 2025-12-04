@@ -1,6 +1,6 @@
 import React from 'react';
-import { FilmStock, PaperType, AspectRatio, FontFamily } from '../types';
-import { FILM_STOCKS, PAPERS, ASPECT_RATIOS } from '../constants';
+import { FilmStock, PaperType, AspectRatio, FontFamily, FrameType } from '../types';
+import { FILM_STOCKS, PAPERS, ASPECT_RATIOS, FRAMES } from '../constants';
 import {
   Upload,
   Type,
@@ -9,6 +9,7 @@ import {
   Palette,
   ArrowUpDown,
   Sliders,
+  Frame,
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -33,7 +34,11 @@ interface SidebarProps {
   setVignette: (n: number) => void;
   warmth: number;
   setWarmth: (n: number) => void;
+  currentFrame: FrameType;
+  setFrame: (f: FrameType) => void;
 }
+
+
 
 const SidebarSection: React.FC<{
   title: string;
@@ -73,6 +78,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
   setVignette,
   warmth,
   setWarmth,
+  currentFrame,
+  setFrame,
 }) => {
   return (
     <aside className="w-full md:w-[380px] bg-white border-t md:border-t-0 md:border-r border-[#E5E5E5] h-auto md:h-full md:max-h-none overflow-y-auto z-40 flex flex-col order-2 md:order-1 flex-shrink-0">
@@ -134,6 +141,25 @@ export const Sidebar: React.FC<SidebarProps> = ({
                       : 'bg-transparent'
                   }`}
                 />
+              </button>
+            ))}
+          </div>
+        </SidebarSection>
+
+        {/* Frame Style */}
+        <SidebarSection title="Frame Style" icon={<Frame size={14} />}>
+          <div className="grid grid-cols-3 gap-1.5 sm:gap-2">
+            {FRAMES.map((frame) => (
+              <button
+                key={frame.id}
+                onClick={() => setFrame(frame)}
+                className={`py-2 sm:py-2.5 border text-[10px] sm:text-xs font-mono transition-all active:scale-95 ${
+                  currentFrame.id === frame.id
+                    ? 'border-[#1C1C1C] bg-[#1C1C1C] text-white'
+                    : 'border-[#E5E5E5] text-gray-500 hover:border-gray-400'
+                }`}
+              >
+                {frame.name}
               </button>
             ))}
           </div>

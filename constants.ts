@@ -1,4 +1,15 @@
-import { AspectRatio, FilmStock, PaperType } from "./types";
+import { AspectRatio, FilmStock, PaperType, FrameType } from "./types";
+
+// ... (FILM_STOCKS, PAPERS, ASPECT_RATIOS remain same)
+
+export const FRAMES: FrameType[] = [
+  { id: 'none', name: 'Standard', cssClass: '', type: 'paper' },
+  { id: 'film-strip', name: 'Film Strip', cssClass: 'film-strip-border', type: 'film' },
+  { id: 'polaroid', name: 'Polaroid', cssClass: 'polaroid-border', type: 'polaroid' },
+];
+
+// SVG Noise data URI for the paper grain texture
+export const NOISE_TEXTURE = `data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='1'/%3E%3C/svg%3E`;
 
 export const FILM_STOCKS: FilmStock[] = [
   {
@@ -47,5 +58,4 @@ export const ASPECT_RATIOS: AspectRatio[] = [
   { id: '2:3', label: '2:3', ratio: 0.66, cssClass: 'aspect-[2/3]' },
 ];
 
-// SVG Noise data URI for the paper grain texture
-export const NOISE_TEXTURE = `data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='1'/%3E%3C/svg%3E`;
+
