@@ -2,7 +2,23 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Custom scrollbar styling - requires CSS as Tailwind doesn't support pseudo-elements for scrollbars */
+:root {
+  --card-scale: 1;
+}
+
+@media (max-width: 640px) {
+  :root { --card-scale: 0.55; }
+}
+@media (min-width: 641px) and (max-width: 768px) {
+  :root { --card-scale: 0.7; }
+}
+@media (min-width: 769px) and (max-width: 1024px) {
+  :root { --card-scale: 0.85; }
+}
+@media (min-width: 1025px) {
+  :root { --card-scale: 1; }
+}
+
 ::-webkit-scrollbar {
   width: 6px;
 }

@@ -1,5 +1,7 @@
+import ExifReader from 'exifreader';
+
 import React, { useState, useRef, useCallback, useEffect } from 'react';
-import { toPng } from 'html-to-image';
+import { toBlob } from 'html-to-image';
 import { Sidebar } from './components/Sidebar';
 import PhotoCard from './components/PhotoCard';
 import { FILM_STOCKS, PAPERS, ASPECT_RATIOS } from './constants';
@@ -21,11 +23,17 @@ const App: React.FC = () => {
   const [image, setImage] = useState<string>('');
   const [filter, setFilter] = useState<FilmStock>(FILM_STOCKS[0]);
   const [paper, setPaper] = useState<PaperType>(PAPERS[0]);
-  const [aspectRatio, setAspectRatio] = useState<AspectRatio>(ASPECT_RATIOS[1]); // Default 4:5
+  const [aspectRatio, setAspectRatio] = useState<AspectRatio>(ASPECT_RATIOS[1]);
   const [caption, setCaption] = useState<string>('Memoir. No. 001');
   const [fontFamily, setFontFamily] = useState<FontFamily>('serif');
-  const [imagePosition, setImagePosition] = useState<number>(50); // 0-100, default 50 (center) - vertical
-  const [imagePositionX, setImagePositionX] = useState<number>(50); // 0-100, default 50 (center) - horizontal
+  const [imagePosition, setImagePosition] = useState<number>(50);
+  const [imagePositionX, setImagePositionX] = useState<number>(50);
+  
+  // New Granular Controls
+  const [grain, setGrain] = useState<number>(50); // 0-100
+  const [vignette, setVignette] = useState<number>(20); // 0-100
+  const [warmth, setWarmth] = useState<number>(0); // 0-100
+
   const [metadata, setMetadata] = useState<PhotoMetadata>({
     iso: 'ISO 400',
     aperture: 'ƒ/2.8',
@@ -40,7 +48,6 @@ const App: React.FC = () => {
   });
 
   const [isExporting, setIsExporting] = useState(false);
-  const [flash, setFlash] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
 
   // Load initial image and convert to base64 to avoid CORS issues on export
@@ -73,55 +80,108 @@ const App: React.FC = () => {
   }, []);
 
   // Handlers
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // Handlers
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
+      
+      // Load Image
       const reader = new FileReader();
       reader.onload = (event) => {
         if (event.target?.result) {
           setImage(event.target.result as string);
-          // Generate pseudo random metadata for the feel
-          setMetadata({
-            ...metadata,
-            iso: `ISO ${
-              [100, 200, 400, 800, 1600][Math.floor(Math.random() * 5)]
-            }`,
-            aperture: `ƒ/${
-              [1.4, 1.8, 2.0, 2.8, 4.0, 5.6][Math.floor(Math.random() * 6)]
-            }`,
-            shutterSpeed: `1/${
-              [60, 125, 250, 500, 1000][Math.floor(Math.random() * 5)]
-            }`,
-          });
         }
       };
       reader.readAsDataURL(file);
+
+      // Reset metadata to "Scanning..." feel or just random immediately to show change
+      // We'll generate new random defaults first, then override if EXIF exists
+      const randomIso = [100, 200, 400, 800, 1600][Math.floor(Math.random() * 5)];
+      const randomAperture = [1.4, 1.8, 2.0, 2.8, 4.0, 5.6][Math.floor(Math.random() * 6)];
+      const randomShutter = [60, 125, 250, 500, 1000][Math.floor(Math.random() * 5)];
+      
+      const newMetadata: PhotoMetadata = {
+        iso: `ISO ${randomIso}`,
+        aperture: `ƒ/${randomAperture}`,
+        shutterSpeed: `1/${randomShutter}`,
+        date: new Date().toLocaleDateString('en-US', {
+          month: 'short',
+          day: 'numeric',
+          year: 'numeric',
+        }).toUpperCase(),
+      };
+
+      setMetadata(newMetadata);
+
+      // Extract EXIF Data
+      try {
+        const tags = await ExifReader.load(file);
+        
+        // Update with real data if available
+        if (tags['ISOSpeedRatings']?.description) {
+          newMetadata.iso = `ISO ${tags['ISOSpeedRatings'].description}`;
+        }
+        
+        if (tags['FNumber']?.description) {
+          newMetadata.aperture = `ƒ/${parseFloat(tags['FNumber'].description).toFixed(1)}`;
+        }
+        
+        if (tags['ExposureTime']?.description) {
+          newMetadata.shutterSpeed = `${tags['ExposureTime'].description}`;
+        }
+        
+        if (tags['DateTimeOriginal']?.description) {
+          const date = new Date(tags['DateTimeOriginal'].description.replace(/:/g, '-').replace(' ', 'T'));
+          if (!isNaN(date.getTime())) {
+            newMetadata.date = date.toLocaleDateString('en-US', {
+              month: 'short',
+              day: 'numeric',
+              year: 'numeric',
+            }).toUpperCase();
+          }
+        }
+
+        setMetadata({ ...newMetadata }); // Trigger re-render with final data
+      } catch (error) {
+        console.log('No EXIF data found, using random analog values');
+        // Already set to random above, so we're good!
+      }
     }
   };
 
-  const handleExport = useCallback(async () => {
+  const handleExport = useCallback(async (e?: React.MouseEvent) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
     if (cardRef.current === null) return;
 
     setIsExporting(true);
 
-    // Trigger Flash
-    setFlash(true);
-    setTimeout(() => setFlash(false), 150);
-
     try {
-      const dataUrl = await toPng(cardRef.current, {
+      // Use toBlob instead of toPng to save memory (Base64 is 33% larger)
+      const blob = await toBlob(cardRef.current, {
         cacheBust: true,
-        pixelRatio: 2,
+        pixelRatio: 2, 
+        skipAutoScale: true,
+        type: 'image/png',
       });
+
+      if (!blob) throw new Error('Failed to generate image blob');
+
+      const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.download = `memoir-export-${Date.now()}.png`;
-      link.href = dataUrl;
+      link.href = url;
+      document.body.appendChild(link);
       link.click();
+      document.body.removeChild(link);
+      
+      // Clean up the object URL after a small delay to ensure download starts
+      setTimeout(() => URL.revokeObjectURL(url), 100);
     } catch (err) {
       console.error('Failed to export image', err);
-      alert(
-        'Could not export. If using the default image, this might be a CORS issue. Try uploading your own image.'
-      );
+      alert('Could not export image. Please try again.');
     } finally {
       setIsExporting(false);
     }
@@ -147,13 +207,6 @@ const App: React.FC = () => {
       onDragOver={(e) => e.preventDefault()}
       onDrop={handleDrop}
     >
-      {/* Flash Overlay */}
-      <div
-        className={`fixed inset-0 bg-white z-[60] pointer-events-none transition-opacity duration-150 ease-out ${
-          flash ? 'opacity-100' : 'opacity-0'
-        }`}
-      />
-
       {/* Header - Top on mobile, inside sidebar on desktop */}
       <header className="md:hidden w-full bg-white border-b border-[#E5E5E5] flex-shrink-0 z-30 sticky top-0">
         <div className="p-4 sm:p-6">
@@ -174,7 +227,8 @@ const App: React.FC = () => {
         {/* Floating Export Button */}
         <div className="absolute top-3 right-3 sm:top-6 sm:right-6 z-50">
           <button
-            onClick={handleExport}
+            type="button"
+            onClick={(e) => handleExport(e)}
             disabled={isExporting}
             className="flex items-center gap-2 sm:gap-3 bg-[#1C1C1C] text-white px-4 py-2 sm:px-6 sm:py-3 rounded-full shadow-lg hover:bg-[#333] hover:scale-105 transition-all active:scale-95 disabled:opacity-50"
           >
@@ -194,9 +248,13 @@ const App: React.FC = () => {
 
         {/* The Art Piece */}
         <div
-          className={`relative z-10 w-full max-w-[280px] sm:max-w-[340px] md:max-w-[420px] lg:max-w-[520px] flex items-center justify-center scale-[0.85] sm:scale-90 md:scale-100 transition-transform py-4 sm:py-6 md:py-8 ${
-            aspectRatio.id === '2:3' ? 'mt-4 sm:mt-6 md:mt-8' : ''
+          className={`relative z-10 flex items-center justify-center py-4 ${
+            aspectRatio.id === '2:3' ? 'mt-4' : ''
           }`}
+          style={{
+            transform: 'scale(var(--card-scale, 0.9))',
+            transformOrigin: 'center center',
+          }}
         >
           <PhotoCard
             innerRef={cardRef}
@@ -209,11 +267,14 @@ const App: React.FC = () => {
             fontFamily={fontFamily}
             imagePosition={imagePosition}
             imagePositionX={imagePositionX}
+            grain={grain}
+            vignette={vignette}
+            warmth={warmth}
           />
         </div>
       </main>
 
-      {/* Sidebar Controls - Third on mobile (after header and image), first on desktop */}
+      {/* Sidebar Controls */}
       <Sidebar
         currentFilter={filter}
         setFilter={setFilter}
@@ -230,6 +291,12 @@ const App: React.FC = () => {
         imagePositionX={imagePositionX}
         setImagePositionX={setImagePositionX}
         onUpload={handleImageUpload}
+        grain={grain}
+        setGrain={setGrain}
+        vignette={vignette}
+        setVignette={setVignette}
+        warmth={warmth}
+        setWarmth={setWarmth}
       />
     </div>
   );

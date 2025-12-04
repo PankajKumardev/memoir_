@@ -8,6 +8,7 @@ import {
   Layout,
   Palette,
   ArrowUpDown,
+  Sliders,
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -26,6 +27,12 @@ interface SidebarProps {
   imagePositionX: number;
   setImagePositionX: (p: number) => void;
   onUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  grain: number;
+  setGrain: (n: number) => void;
+  vignette: number;
+  setVignette: (n: number) => void;
+  warmth: number;
+  setWarmth: (n: number) => void;
 }
 
 const SidebarSection: React.FC<{
@@ -60,6 +67,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
   imagePositionX,
   setImagePositionX,
   onUpload,
+  grain,
+  setGrain,
+  vignette,
+  setVignette,
+  warmth,
+  setWarmth,
 }) => {
   return (
     <aside className="w-full md:w-[380px] bg-white border-t md:border-t-0 md:border-r border-[#E5E5E5] h-auto md:h-full md:max-h-none overflow-y-auto z-40 flex flex-col order-2 md:order-1 flex-shrink-0">
@@ -123,6 +136,68 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 />
               </button>
             ))}
+          </div>
+        </SidebarSection>
+
+        {/* Fine Tune Controls */}
+        <SidebarSection title="Fine Tune" icon={<Sliders size={14} />}>
+          <div className="space-y-4">
+            {/* Grain */}
+            <div>
+              <div className="flex justify-between mb-1.5">
+                <label className="font-mono text-[9px] sm:text-[10px] text-gray-500 uppercase">Grain</label>
+                <span className="font-mono text-[9px] sm:text-[10px] text-gray-400">{grain}%</span>
+              </div>
+              <input
+                type="range"
+                min="0"
+                max="100"
+                value={grain}
+                onChange={(e) => setGrain(Number(e.target.value))}
+                className="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-[#1C1C1C]"
+                style={{
+                  background: `linear-gradient(to right, #1C1C1C 0%, #1C1C1C ${grain}%, #E5E5E5 ${grain}%, #E5E5E5 100%)`,
+                }}
+              />
+            </div>
+
+            {/* Vignette */}
+            <div>
+              <div className="flex justify-between mb-1.5">
+                <label className="font-mono text-[9px] sm:text-[10px] text-gray-500 uppercase">Vignette</label>
+                <span className="font-mono text-[9px] sm:text-[10px] text-gray-400">{vignette}%</span>
+              </div>
+              <input
+                type="range"
+                min="0"
+                max="100"
+                value={vignette}
+                onChange={(e) => setVignette(Number(e.target.value))}
+                className="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-[#1C1C1C]"
+                style={{
+                  background: `linear-gradient(to right, #1C1C1C 0%, #1C1C1C ${vignette}%, #E5E5E5 ${vignette}%, #E5E5E5 100%)`,
+                }}
+              />
+            </div>
+
+            {/* Warmth */}
+            <div>
+              <div className="flex justify-between mb-1.5">
+                <label className="font-mono text-[9px] sm:text-[10px] text-gray-500 uppercase">Warmth</label>
+                <span className="font-mono text-[9px] sm:text-[10px] text-gray-400">{warmth}%</span>
+              </div>
+              <input
+                type="range"
+                min="0"
+                max="100"
+                value={warmth}
+                onChange={(e) => setWarmth(Number(e.target.value))}
+                className="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-[#1C1C1C]"
+                style={{
+                  background: `linear-gradient(to right, #1C1C1C 0%, #1C1C1C ${warmth}%, #E5E5E5 ${warmth}%, #E5E5E5 100%)`,
+                }}
+              />
+            </div>
           </div>
         </SidebarSection>
 
