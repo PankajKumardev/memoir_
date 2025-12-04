@@ -13,12 +13,43 @@ import {
   FontFamily,
   FrameType,
 } from './types';
-import { ArrowDownToLine, Loader2 } from 'lucide-react';
+import { ArrowDownToLine, Loader2, Copy, RotateCcw, Undo2, Redo2 } from 'lucide-react';
 
 const getRandomImageUrl = () => {
   const randomId = Math.floor(Math.random() * 1000);
   return `https://picsum.photos/800/1000?random=${randomId}`;
 };
+
+// Toast Notification Component
+const Toast: React.FC<{ message: string; onClose: () => void }> = ({ message, onClose }) => {
+  useEffect(() => {
+    const timer = setTimeout(onClose, 2000);
+    return () => clearTimeout(timer);
+  }, [onClose]);
+
+  return (
+    <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[100] animate-in fade-in slide-in-from-bottom-4 duration-300">
+      <div className="bg-[#1C1C1C] text-white px-4 py-2 rounded-full shadow-lg font-mono text-xs tracking-wide">
+        {message}
+      </div>
+    </div>
+  );
+};
+
+// Settings state type for history
+interface SettingsState {
+  filter: FilmStock;
+  paper: PaperType;
+  aspectRatio: AspectRatio;
+  caption: string;
+  fontFamily: FontFamily;
+  imagePosition: number;
+  imagePositionX: number;
+  grain: number;
+  vignette: number;
+  warmth: number;
+  frame: FrameType;
+}
 
 const App: React.FC = () => {
   const [image, setImage] = useState<string>('');
@@ -53,6 +84,98 @@ const App: React.FC = () => {
 
   const [isExporting, setIsExporting] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
+
+  // Toast notification state
+  const [toast, setToast] = useState<string | null>(null);
+  const showToast = useCallback((message: string) => setToast(message), []);
+
+  // Undo/Redo History
+  const [history, setHistory] = useState<SettingsState[]>([]);
+  const [redoStack, setRedoStack] = useState<SettingsState[]>([]);
+  const historyRef = useRef<SettingsState[]>([]);
+  const redoRef = useRef<SettingsState[]>([]);
+  const isUndoingRef = useRef(false);
+
+  // Save current state to history (debounced for sliders)
+  const saveToHistory = useCallback(() => {
+    if (isUndoingRef.current) {
+      isUndoingRef.current = false;
+      return;
+    }
+    const currentState: SettingsState = {
+      filter, paper, aspectRatio, caption, fontFamily,
+      imagePosition, imagePositionX, grain, vignette, warmth, frame
+    };
+    historyRef.current = [...historyRef.current.slice(-19), currentState];
+    setHistory(historyRef.current);
+    // Clear redo stack on new action
+    redoRef.current = [];
+    setRedoStack([]);
+  }, [filter, paper, aspectRatio, caption, fontFamily, imagePosition, imagePositionX, grain, vignette, warmth, frame]);
+
+  // Apply a state
+  const applyState = useCallback((state: SettingsState) => {
+    isUndoingRef.current = true;
+    setFilter(state.filter);
+    setPaper(state.paper);
+    setAspectRatio(state.aspectRatio);
+    setCaption(state.caption);
+    setFontFamily(state.fontFamily);
+    setImagePosition(state.imagePosition);
+    setImagePositionX(state.imagePositionX);
+    setGrain(state.grain);
+    setVignette(state.vignette);
+    setWarmth(state.warmth);
+    setFrame(state.frame);
+  }, []);
+
+  // Undo function
+  const handleUndo = useCallback(() => {
+    if (historyRef.current.length < 2) return;
+    
+    const currentState = historyRef.current.pop()!;
+    redoRef.current = [...redoRef.current, currentState];
+    setRedoStack([...redoRef.current]);
+    
+    const prevState = historyRef.current[historyRef.current.length - 1];
+    if (prevState) {
+      applyState(prevState);
+      setHistory([...historyRef.current]);
+    }
+  }, [applyState]);
+
+  // Redo function
+  const handleRedo = useCallback(() => {
+    if (redoRef.current.length === 0) return;
+    
+    const nextState = redoRef.current.pop()!;
+    setRedoStack([...redoRef.current]);
+    
+    historyRef.current = [...historyRef.current, nextState];
+    setHistory([...historyRef.current]);
+    applyState(nextState);
+  }, [applyState]);
+
+  // Keyboard shortcuts for undo/redo
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'z' && !e.shiftKey) {
+        e.preventDefault();
+        handleUndo();
+      } else if ((e.ctrlKey || e.metaKey) && (e.key === 'y' || (e.key === 'z' && e.shiftKey))) {
+        e.preventDefault();
+        handleRedo();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [handleUndo, handleRedo]);
+
+  // Save to history when settings change (debounced)
+  useEffect(() => {
+    const timer = setTimeout(saveToHistory, 500);
+    return () => clearTimeout(timer);
+  }, [filter, paper, aspectRatio, caption, fontFamily, imagePosition, imagePositionX, grain, vignette, warmth, frame, saveToHistory]);
 
   // Load initial image and convert to base64 to avoid CORS issues on export
   useEffect(() => {
@@ -184,11 +307,68 @@ const App: React.FC = () => {
       setTimeout(() => URL.revokeObjectURL(url), 100);
     } catch (err) {
       console.error('Failed to export image', err);
-      alert('Could not export image. Please try again.');
+      showToast('Export failed');
     } finally {
       setIsExporting(false);
     }
-  }, [cardRef]);
+  }, [cardRef, showToast]);
+
+  // Copy to Clipboard
+  const [isCopying, setIsCopying] = useState(false);
+  const handleCopyToClipboard = useCallback(async () => {
+    if (cardRef.current === null) return;
+
+    setIsCopying(true);
+
+    try {
+      const blob = await toBlob(cardRef.current, {
+        cacheBust: true,
+        pixelRatio: 2,
+        skipAutoScale: true,
+        type: 'image/png',
+      });
+
+      if (!blob) throw new Error('Failed to generate image blob');
+
+      await navigator.clipboard.write([
+        new ClipboardItem({ 'image/png': blob })
+      ]);
+
+      showToast('Copied to clipboard');
+    } catch (err) {
+      console.error('Failed to copy to clipboard', err);
+      showToast('Copy failed - try download');
+    } finally {
+      setIsCopying(false);
+    }
+  }, [cardRef, showToast]);
+
+  // Reset All Settings
+  const handleResetAll = useCallback(() => {
+    setFilter(FILM_STOCKS[0]);
+    setPaper(PAPERS[0]);
+    setAspectRatio(ASPECT_RATIOS[1]);
+    setCaption('Memoir. No. 001');
+    setFontFamily('serif');
+    setImagePosition(50);
+    setImagePositionX(50);
+    setGrain(50);
+    setVignette(20);
+    setWarmth(0);
+    setFrame(FRAMES[0]);
+    setMetadata({
+      iso: 'ISO 400',
+      aperture: 'ƒ/2.8',
+      shutterSpeed: '1/125',
+      date: new Date()
+        .toLocaleDateString('en-US', {
+          month: 'short',
+          day: 'numeric',
+          year: 'numeric',
+        })
+        .toUpperCase(),
+    });
+  }, []);
 
   // Drag and Drop
   const handleDrop = (e: React.DragEvent) => {
@@ -227,8 +407,56 @@ const App: React.FC = () => {
         {/* Gallery Wall Effect - subtle radial gradient behind the art */}
         <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-white/40 to-transparent opacity-50" />
 
-        {/* Floating Export Button */}
-        <div className="absolute top-3 right-3 sm:top-6 sm:right-6 z-50">
+        {/* Floating Action Buttons */}
+        <div className="absolute top-3 right-3 sm:top-6 sm:right-6 z-50 flex items-center gap-2">
+          {/* Undo Button */}
+          <button
+            type="button"
+            onClick={handleUndo}
+            disabled={history.length < 2}
+            className="flex items-center justify-center w-10 h-10 sm:w-11 sm:h-11 bg-white text-[#1C1C1C] rounded-full shadow-lg hover:bg-gray-100 hover:scale-105 transition-all active:scale-95 border border-gray-200 disabled:opacity-30"
+            title="Undo (Ctrl+Z)"
+          >
+            <Undo2 className="w-4 h-4" />
+          </button>
+
+          {/* Redo Button */}
+          <button
+            type="button"
+            onClick={handleRedo}
+            disabled={redoStack.length === 0}
+            className="flex items-center justify-center w-10 h-10 sm:w-11 sm:h-11 bg-white text-[#1C1C1C] rounded-full shadow-lg hover:bg-gray-100 hover:scale-105 transition-all active:scale-95 border border-gray-200 disabled:opacity-30"
+            title="Redo (Ctrl+Shift+Z)"
+          >
+            <Redo2 className="w-4 h-4" />
+          </button>
+
+          {/* Reset Button */}
+          <button
+            type="button"
+            onClick={handleResetAll}
+            className="flex items-center justify-center w-10 h-10 sm:w-11 sm:h-11 bg-white text-[#1C1C1C] rounded-full shadow-lg hover:bg-gray-100 hover:scale-105 transition-all active:scale-95 border border-gray-200"
+            title="Reset All Settings"
+          >
+            <RotateCcw className="w-4 h-4" />
+          </button>
+
+          {/* Copy Button */}
+          <button
+            type="button"
+            onClick={handleCopyToClipboard}
+            disabled={isCopying}
+            className="flex items-center justify-center w-10 h-10 sm:w-11 sm:h-11 bg-white text-[#1C1C1C] rounded-full shadow-lg hover:bg-gray-100 hover:scale-105 transition-all active:scale-95 border border-gray-200 disabled:opacity-50"
+            title="Copy to Clipboard"
+          >
+            {isCopying ? (
+              <Loader2 className="animate-spin w-4 h-4" />
+            ) : (
+              <Copy className="w-4 h-4" />
+            )}
+          </button>
+
+          {/* Export/Download Button */}
           <button
             type="button"
             onClick={(e) => handleExport(e)}
@@ -241,7 +469,7 @@ const App: React.FC = () => {
               <ArrowDownToLine className="w-3 h-3 sm:w-4 sm:h-4" />
             )}
             <span className="font-mono text-[10px] sm:text-xs tracking-widest uppercase hidden sm:inline">
-              Develop & Save
+              Download
             </span>
             <span className="font-mono text-[10px] tracking-widest uppercase sm:hidden">
               Save
@@ -304,6 +532,9 @@ const App: React.FC = () => {
         currentFrame={frame}
         setFrame={setFrame}
       />
+
+      {/* Toast Notification */}
+      {toast && <Toast message={toast} onClose={() => setToast(null)} />}
     </div>
   );
 };
