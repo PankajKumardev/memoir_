@@ -22,15 +22,33 @@
 
 **Memoir.** is a web application that transforms digital photos into beautiful analog film-style photo cards. It offers a curated selection of film stocks, paper textures, aspect ratios, and typography options to create stunning, gallery-ready prints.
 
-### Features
+### ✨ Features
 
-- 🎨 **Film Stock Presets**: Choose from multiple film stock emulations (Portra 400, Ilford HP5, Cinestill 800T, Ektar 100, and more)
-- 📄 **Paper Types**: Select from different paper bases (Alabaster, Exhibition White, Matte Black, Kraft)
-- 📐 **Aspect Ratios**: Multiple formats including 1:1, 4:5, 16:9, and 2:3
-- ✍️ **Custom Typography**: Add captions with different font styles (Serif, Script, Mono)
-- 📱 **Fully Responsive**: Optimized for both mobile and desktop experiences
-- 💾 **Export**: Download high-resolution PNG exports of your creations
-- 🎯 **Real-time Preview**: See your changes instantly as you customize
+#### 🎞️ Film & Effects
+- **Film Stock Presets** - Choose from multiple film emulations (Portra 400, Ilford HP5, Cinestill 800T, Ektar 100, and more)
+- **Granular Controls** - Fine-tune Grain, Vignette, and Warmth with precise sliders
+- **Real-time Preview** - See your changes instantly as you customize
+
+#### 🖼️ Frame Styles
+- **Standard** - Clean gallery-style presentation
+- **Film Strip** - Authentic 35mm film look with sprocket holes (auto-orientation)
+- **Polaroid** - Classic instant-film aesthetic with signature chin
+
+#### 📄 Paper & Typography
+- **Paper Types** - Select from different paper bases (Alabaster, Exhibition White, Matte Black, Kraft)
+- **Custom Typography** - Add captions with different font styles (Serif, Script, Mono)
+- **Aspect Ratios** - Multiple formats including 1:1, 4:5, 16:9, and 2:3
+
+#### 🚀 Productivity
+- **Undo/Redo** - Full history with `Ctrl+Z` / `Ctrl+Shift+Z` support
+- **Copy to Clipboard** - One-click copy for quick social sharing
+- **Reset All** - Instantly restore default settings
+- **EXIF Extraction** - Auto-reads camera metadata from uploaded images
+
+#### 📱 Export & Responsive
+- **High-Res Export** - Download 2x resolution PNG exports
+- **Fully Responsive** - Optimized for both mobile and desktop
+- **Drag & Drop** - Easy image upload
 
 ## 🚀 Getting Started
 
@@ -86,6 +104,7 @@ npm run preview
 - **Vite** - Build tool and dev server
 - **Tailwind CSS** - Styling
 - **html-to-image** - Image export functionality
+- **ExifReader** - EXIF metadata extraction
 - **Lucide React** - Icons
 
 ## 📁 Project Structure
@@ -96,9 +115,9 @@ memoir_/
 │   ├── PhotoCard.tsx      # Main photo card component
 │   └── Sidebar.tsx        # Control panel sidebar
 ├── App.tsx                # Main application component
-├── constants.ts           # Film stocks, papers, aspect ratios
+├── constants.ts           # Film stocks, papers, aspect ratios, frames
 ├── types.ts               # TypeScript type definitions
-├── global.css             # Global styles (scrollbar, etc.)
+├── index.css              # Global styles & frame effects
 ├── index.html             # HTML entry point
 ├── index.tsx              # React entry point
 └── vite.config.ts         # Vite configuration
@@ -107,20 +126,30 @@ memoir_/
 ## 🎨 Usage
 
 1. **Upload an Image**
-
    - Click "Load Negative" or drag and drop an image file
-   - The app starts with a default sample image
+   - EXIF metadata (ISO, aperture, date) is extracted automatically
 
 2. **Customize Your Photo**
+   - **Film Stock**: Apply color grading presets
+   - **Frame Style**: Choose Standard, Film Strip, or Polaroid
+   - **Format**: Select aspect ratio (1:1, 4:5, 2:3, 16:9)
+   - **Paper Base**: Pick background color/texture
+   - **Effects**: Adjust Grain, Vignette, and Warmth
+   - **Inscription**: Add caption with custom typography
 
-   - **Film Stock**: Choose a film stock preset to apply different color grading
-   - **Format**: Select an aspect ratio for your photo
-   - **Paper Base**: Pick a paper color/texture background
-   - **Inscription**: Add a custom caption and choose a font style
+3. **Export & Share**
+   - 📋 **Copy** - Copy to clipboard for quick sharing
+   - 💾 **Save** - Download as high-res PNG
+   - ↩️ **Undo/Redo** - `Ctrl+Z` / `Ctrl+Shift+Z`
+   - 🔄 **Reset** - Restore all defaults
 
-3. **Export**
-   - Click "Develop & Save" button in the top right
-   - Your photo will be exported as a high-resolution PNG file
+## ⌨️ Keyboard Shortcuts
+
+| Shortcut | Action |
+|----------|--------|
+| `Ctrl+Z` | Undo |
+| `Ctrl+Shift+Z` | Redo |
+| `Ctrl+Y` | Redo (alternative) |
 
 ## 🎯 Mobile Experience
 

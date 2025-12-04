@@ -408,37 +408,38 @@ const App: React.FC = () => {
         <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-white/40 to-transparent opacity-50" />
 
         {/* Floating Action Buttons */}
-        <div className="absolute top-3 right-3 sm:top-6 sm:right-6 z-50 flex items-center gap-2">
-          {/* Undo Button */}
-          <button
-            type="button"
-            onClick={handleUndo}
-            disabled={history.length < 2}
-            className="flex items-center justify-center w-10 h-10 sm:w-11 sm:h-11 bg-white text-[#1C1C1C] rounded-full shadow-lg hover:bg-gray-100 hover:scale-105 transition-all active:scale-95 border border-gray-200 disabled:opacity-30"
-            title="Undo (Ctrl+Z)"
-          >
-            <Undo2 className="w-4 h-4" />
-          </button>
+        <div className="absolute top-3 right-3 sm:top-6 sm:right-6 z-50 flex items-center gap-1.5 sm:gap-2">
+          {/* Undo/Redo Group */}
+          <div className="flex items-center bg-white rounded-full shadow-md border border-gray-200">
+            <button
+              type="button"
+              onClick={handleUndo}
+              disabled={history.length < 2}
+              className="flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 text-[#1C1C1C] hover:bg-gray-100 transition-all disabled:opacity-30 rounded-l-full"
+              title="Undo (Ctrl+Z)"
+            >
+              <Undo2 className="w-3.5 h-3.5" />
+            </button>
+            <div className="w-px h-4 bg-gray-200" />
+            <button
+              type="button"
+              onClick={handleRedo}
+              disabled={redoStack.length === 0}
+              className="flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 text-[#1C1C1C] hover:bg-gray-100 transition-all disabled:opacity-30 rounded-r-full"
+              title="Redo (Ctrl+Shift+Z)"
+            >
+              <Redo2 className="w-3.5 h-3.5" />
+            </button>
+          </div>
 
-          {/* Redo Button */}
-          <button
-            type="button"
-            onClick={handleRedo}
-            disabled={redoStack.length === 0}
-            className="flex items-center justify-center w-10 h-10 sm:w-11 sm:h-11 bg-white text-[#1C1C1C] rounded-full shadow-lg hover:bg-gray-100 hover:scale-105 transition-all active:scale-95 border border-gray-200 disabled:opacity-30"
-            title="Redo (Ctrl+Shift+Z)"
-          >
-            <Redo2 className="w-4 h-4" />
-          </button>
-
-          {/* Reset Button */}
+          {/* Reset Button - Hidden on mobile */}
           <button
             type="button"
             onClick={handleResetAll}
-            className="flex items-center justify-center w-10 h-10 sm:w-11 sm:h-11 bg-white text-[#1C1C1C] rounded-full shadow-lg hover:bg-gray-100 hover:scale-105 transition-all active:scale-95 border border-gray-200"
+            className="hidden sm:flex items-center justify-center w-9 h-9 bg-white text-[#1C1C1C] rounded-full shadow-md hover:bg-gray-100 transition-all border border-gray-200"
             title="Reset All Settings"
           >
-            <RotateCcw className="w-4 h-4" />
+            <RotateCcw className="w-3.5 h-3.5" />
           </button>
 
           {/* Copy Button */}
@@ -446,13 +447,13 @@ const App: React.FC = () => {
             type="button"
             onClick={handleCopyToClipboard}
             disabled={isCopying}
-            className="flex items-center justify-center w-10 h-10 sm:w-11 sm:h-11 bg-white text-[#1C1C1C] rounded-full shadow-lg hover:bg-gray-100 hover:scale-105 transition-all active:scale-95 border border-gray-200 disabled:opacity-50"
+            className="flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 bg-white text-[#1C1C1C] rounded-full shadow-md hover:bg-gray-100 transition-all border border-gray-200 disabled:opacity-50"
             title="Copy to Clipboard"
           >
             {isCopying ? (
-              <Loader2 className="animate-spin w-4 h-4" />
+              <Loader2 className="animate-spin w-3.5 h-3.5" />
             ) : (
-              <Copy className="w-4 h-4" />
+              <Copy className="w-3.5 h-3.5" />
             )}
           </button>
 
@@ -461,17 +462,14 @@ const App: React.FC = () => {
             type="button"
             onClick={(e) => handleExport(e)}
             disabled={isExporting}
-            className="flex items-center gap-2 sm:gap-3 bg-[#1C1C1C] text-white px-4 py-2 sm:px-6 sm:py-3 rounded-full shadow-lg hover:bg-[#333] hover:scale-105 transition-all active:scale-95 disabled:opacity-50"
+            className="flex items-center gap-1.5 sm:gap-2 bg-[#1C1C1C] text-white px-3 py-1.5 sm:px-4 sm:py-2 rounded-full shadow-md hover:bg-[#333] transition-all disabled:opacity-50"
           >
             {isExporting ? (
-              <Loader2 className="animate-spin w-3 h-3 sm:w-4 sm:h-4" />
+              <Loader2 className="animate-spin w-3.5 h-3.5" />
             ) : (
-              <ArrowDownToLine className="w-3 h-3 sm:w-4 sm:h-4" />
+              <ArrowDownToLine className="w-3.5 h-3.5" />
             )}
-            <span className="font-mono text-[10px] sm:text-xs tracking-widest uppercase hidden sm:inline">
-              Download
-            </span>
-            <span className="font-mono text-[10px] tracking-widest uppercase sm:hidden">
+            <span className="font-mono text-[9px] sm:text-[10px] tracking-wider uppercase">
               Save
             </span>
           </button>
